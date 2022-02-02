@@ -24,7 +24,7 @@ class MinhaArvoreDeBuscaBinaria : public ArvoreDeBuscaBinaria<T>
 
     Nodo<T> * NodoRaiz = this->_raiz;
 
-    Nodo<T> * BuscaNaArvore(Nodo<T> * nodo, T chave) const
+    Nodo<T> * BuscaNaArvore(Nodo<T> * nodo, T chave) const 
     {
         while(nodo != nullptr and nodo->chave != chave)
         {

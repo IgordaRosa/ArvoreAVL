@@ -13,63 +13,48 @@ class MinhaArvoreAVL final : public MinhaArvoreDeBuscaBinaria<T>
 {
     ///////////////////////////////////////////////////////////////////////
     protected:
-    Nodo<T> * RotacaoSimplesEsquerda(Nodo<T> * nodoPai, T chave) const
+    Nodo<T> * RotacaoSimplesEsquerda(Nodo<T> * A, T chave) const
     {
-        Nodo<T> * nodo = this->FilhoQueContem(nodoPai, chave);
-        Nodo<T> * aux = nodo->filhoDireita;
-        nodoPai->filhoEsquerda->filhoDireita = nodoPai;
-        nodoPai->filhoEsquerda = aux;
-
-        if(this->NodoRaiz->chave == nodoPai->chave)
-            this->NodoRaiz->chave = nodo->chave;
-
-        return nodoPai;
+        Nodo<T> * C = this->FilhoQueContem(A, chave);
+        Nodo<T> * D = C->filhoEsquerda;
+        A->filhoDireita = D;
+        C->filhoEsquerda = A;
+        return C;
     };
 
-    Nodo<T> * RotacaoSimplesDireita(Nodo<T> * nodoPai, T chave) const
+    Nodo<T> * RotacaoSimplesDireita(Nodo<T> * A, T chave) const
     {
-        Nodo<T> * nodo = this->FilhoQueContem(nodoPai, chave);
-        Nodo<T> * aux = nodo->filhoEsquerda;
-        nodoPai->filhoDireita->filhoEsquerda = nodoPai;
-        nodoPai->filhoDireita = aux;
-
-        nodoPai = nodo;
-
-        return nodoPai;
+        Nodo<T> * B = this->FilhoQueContem(A, chave);
+        Nodo<T> * E = B->filhoDireita;
+        A->filhoEsquerda = E;
+        B->filhoDireita = A;
+        return B;
     };
 
-    Nodo<T> * RotacaoEsquerdaDireita(Nodo<T> * nodoPai, T chave) const
+    Nodo<T> * RotacaoEsquerdaDireita(Nodo<T> * A, T chave) const
     {
-        
+        A->filhoEsquerda = RotacaoSimplesEsquerda(A->filhoEsquerda, chave);
+        return RotacaoSimplesDireita(A, chave);
     };
 
-    Nodo<T> * RotacaoDireitaEsquerda(Nodo<T> * nodoPai, T chave) const
+    Nodo<T> * RotacaoDireitaEsquerda(Nodo<T> * A, T chave) const
     {
-        
+        A->filhoDireita = RotacaoSimplesDireita(A->filhoDireita, chave);
+        return RotacaoSimplesEsquerda(A, chave);
     };  
 
     ///////////////////////////////////////////////////////////////////////
     //Busca pai refeita de forma recursiva
     Nodo<T> * BuscarPai(Nodo<T> * nodo, T chave) const
     {
-        if(nodo == nullptr)
+        if(nodo == nullptr or\
+        nodo->chave == chave or\ 
+        nodo->filhoEsquerda != nullptr and\
+        nodo->filhoEsquerda->chave == chave or\
+        nodo->filhoDireita != nullptr and\
+        nodo->filhoDireita->chave == chave)
         {
-            return nodo;
-        }
-        
-        if(nodo->chave == chave)
-        {
-            return nodo;
-        }
-
-        if(nodo->filhoEsquerda != nullptr and nodo->filhoEsquerda->chave == chave)
-        {
-            return nodo;
-        }
-
-        if(nodo->filhoDireita != nullptr and nodo->filhoDireita->chave == chave)
-        {
-            return nodo;
+            return nodo; 
         }
 
         if(nodo != nullptr and nodo->filhoEsquerda != nullptr)
@@ -81,6 +66,7 @@ class MinhaArvoreAVL final : public MinhaArvoreDeBuscaBinaria<T>
         {
             return BuscarPai(nodo->filhoDireita, chave);
         }
+
         return nodo;
     };
 
@@ -107,6 +93,10 @@ class MinhaArvoreAVL final : public MinhaArvoreDeBuscaBinaria<T>
             else if(b > 1 and B(nodoPai->filhoEsquerda) < 0)
             {
                 nodoPai = RotacaoEsquerdaDireita(nodoPai, chave);
+            }
+            else
+            {
+                return;
             }
         }
     };
