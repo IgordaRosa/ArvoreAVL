@@ -12,72 +12,170 @@ template <typename T>
 class MinhaArvoreAVL final : public MinhaArvoreDeBuscaBinaria<T>
 {
     ///////////////////////////////////////////////////////////////////////
-    public:
-    ~MinhaArvoreAVL()
+    protected:
+    Nodo<T> * RotacaoSimplesEsquerda(Nodo<T> * nodoPai, T chave) const
+    {
+        Nodo<T> * nodo = this->FilhoQueContem(nodoPai, chave);
+        Nodo<T> * aux = nodo->filhoDireita;
+        nodoPai->filhoEsquerda->filhoDireita = nodoPai;
+        nodoPai->filhoEsquerda = aux;
+
+        if(this->NodoRaiz->chave == nodoPai->chave)
+            this->NodoRaiz->chave = nodo->chave;
+
+        return nodoPai;
+    };
+
+    Nodo<T> * RotacaoSimplesDireita(Nodo<T> * nodoPai, T chave) const
+    {
+        Nodo<T> * nodo = this->FilhoQueContem(nodoPai, chave);
+        Nodo<T> * aux = nodo->filhoEsquerda;
+        nodoPai->filhoDireita->filhoEsquerda = nodoPai;
+        nodoPai->filhoDireita = aux;
+
+        nodoPai = nodo;
+
+        return nodoPai;
+    };
+
+    Nodo<T> * RotacaoEsquerdaDireita(Nodo<T> * nodoPai, T chave) const
     {
         
     };
 
+    Nodo<T> * RotacaoDireitaEsquerda(Nodo<T> * nodoPai, T chave) const
+    {
+        
+    };  
+
     ///////////////////////////////////////////////////////////////////////
-    /**
-     * @brief Verifica se a arvore esta vazia
-     * @return Verdade se a arvore esta vazia.
-     */
-    //bool vazia() const {};
-    
+    //Busca pai refeita de forma recursiva
+    Nodo<T> * BuscarPai(Nodo<T> * nodo, T chave) const
+    {
+        if(nodo == nullptr)
+        {
+            return nodo;
+        }
+        
+        if(nodo->chave == chave)
+        {
+            return nodo;
+        }
+
+        if(nodo->filhoEsquerda != nullptr and nodo->filhoEsquerda->chave == chave)
+        {
+            return nodo;
+        }
+
+        if(nodo->filhoDireita != nullptr and nodo->filhoDireita->chave == chave)
+        {
+            return nodo;
+        }
+
+        if(nodo != nullptr and nodo->filhoEsquerda != nullptr)
+        {
+            return BuscarPai(nodo->filhoEsquerda, chave);
+        }
+        
+        if(nodo != nullptr and nodo->filhoDireita != nullptr)
+        {
+            return BuscarPai(nodo->filhoDireita, chave);
+        }
+        return nodo;
+    };
+
     ///////////////////////////////////////////////////////////////////////
-    /**
-     * @brief Retornar quantidade de chaves na arvore
-     * @return Numero natural que representa a quantidade de chaves na arvore
-     */
-    //int quantidade() const {};
-    
+    void Balancear(Nodo<T> * nodoPai, T chave) const
+    {
+        while(nodoPai->chave != this->NodoRaiz->chave)
+        {    
+            if(nodoPai == nullptr)
+                return;
+            int b = B(nodoPai);
+            if(b < -1 and B(nodoPai->filhoDireita) <= 0)
+            {
+                nodoPai = RotacaoSimplesEsquerda(nodoPai, chave);
+            }
+            else if(b < -1 and B(nodoPai->filhoDireita) > 0)
+            {
+                nodoPai = RotacaoDireitaEsquerda(nodoPai, chave);
+            }
+            else if(b > 1 and B(nodoPai->filhoEsquerda) >= 0)
+            {
+                nodoPai = RotacaoSimplesDireita(nodoPai, chave);
+            }
+            else if(b > 1 and B(nodoPai->filhoEsquerda) < 0)
+            {
+                nodoPai = RotacaoEsquerdaDireita(nodoPai, chave);
+            }
+        }
+    };
+
     ///////////////////////////////////////////////////////////////////////
-    /**
-     * @brief Verifica se a arvore contem uma chave
-     * @param chave chave a ser procurada na arvore
-     * @return Verdade se a arvore contem a chave
-     */
-    //bool contem(T chave) const {};
-    
+    int B(Nodo<T> * nodo) const
+    {
+        if(nodo)
+            return (this->AlturaDoNodo(nodo->filhoEsquerda) - this->AlturaDoNodo(nodo->filhoDireita));
+        return 0;
+    };
+
+    int Maior(int a, int b) const
+    {
+        if(a > b)
+            return a;
+        return b;
+    };
+
+    int AlturaDoNodo(Nodo<T> * nodo) const
+    {
+        if(nodo == nullptr)
+            return -1;
+        return Maior(this->AlturaDoNodo(nodo->filhoEsquerda), this->AlturaDoNodo(nodo->filhoDireita)) + 1;;
+    };
+
     ///////////////////////////////////////////////////////////////////////
+    public:
     /**
      * @brief Retorna a altura da (sub)arvore
      * @param chave chave que é raiz da (sub)arvore cuja altura queremos. Se chave é nula, retorna a altura da arvore.
      * @return Numero inteiro representando a altura da (subarvore). Se chave nao esta na arvore, retorna std::nullopt
      */
-    //std::optional<int> altura(T chave) const {};
-
+    std::optional<int> altura(T chave) const override
+    {
+        Nodo<T> * nodo = MinhaArvoreDeBuscaBinaria<T>::BuscaNaArvore(this->NodoRaiz, chave);
+        if(nodo == nullptr)
+            return std::nullopt;
+        return AlturaDoNodo(nodo);
+    };
+    
     ///////////////////////////////////////////////////////////////////////
+    public:
     /**
      * @brief Insere uma chave na arvore
      * @param chave chave a ser inserida
      */        
-    //void inserir(T chave) {};
+    void inserir(T chave)
+    {
+        MinhaArvoreDeBuscaBinaria<T>::inserir(chave);
+        Nodo<T> * nodoPai = BuscarPai(this->NodoRaiz, chave);
+        if(nodoPai)
+            Balancear(nodoPai, chave);
+    };
 
     ///////////////////////////////////////////////////////////////////////
+    public:
     /**
      * @brief Remove uma chave da arvore
      * @param chave chave a removida
      * @return Retorna a chave removida ou nullptr se a chave nao esta na arvore
      */        
-    //void remover(T chave) {};
-
-    ///////////////////////////////////////////////////////////////////////
-    /**
-     * @brief Busca a chave do filho a esquerda de uma (sub)arvore
-     * @param chave chave da arvore que eh pai do filho a esquerda
-     * @return Chave do filho a esquerda. Se chave nao esta na arvore, retorna std::nullopt
-     */
-    //std::optional<T> filhoEsquerdaDe(T chave) const {};
-
-    ///////////////////////////////////////////////////////////////////////
-    /**
-     * @brief Busca a chave do filho a direita de uma (sub)arvore
-     * @param chave chave da arvore que eh pai do filho a direita
-     * @return Chave do filho a direita. Se chave nao esta na arvore, retorna nullptr
-     */     
-    //std::optional<T> filhoDireitaDe(T chave) const {};
+    void remover(T chave)
+    {
+        MinhaArvoreDeBuscaBinaria<T>::remover(chave);
+        Nodo<T> * nodoPai = BuscarPai(this->NodoRaiz, chave);
+        if(nodoPai)
+            Balancear(nodoPai, chave);
+    };
 
     ///////////////////////////////////////////////////////////////////////
 };

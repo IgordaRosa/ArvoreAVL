@@ -1,7 +1,7 @@
 #ifndef MINHAARVOREDEBUSCABINARIA_HPP
 #define MINHAARVOREDEBUSCABINARIA_HPP
 
-#include "ArvoreDeBuscaBinaria.hpp" 
+#include "ArvoreDeBuscaBinaria.hpp"
 #include <cassert>
 #include <utility>
 
@@ -20,7 +20,6 @@ class MinhaArvoreDeBuscaBinaria : public ArvoreDeBuscaBinaria<T>
     -
 
     */
-    ///////////////////////////////////////////////////////////////////////
     protected:
 
     Nodo<T> * NodoRaiz = this->_raiz;
@@ -201,7 +200,7 @@ class MinhaArvoreDeBuscaBinaria : public ArvoreDeBuscaBinaria<T>
             {
                 nodo = nodo->filhoDireita;
             }
-            else
+            else      
             {
                 nodo = nodo->filhoEsquerda;
             }
@@ -225,6 +224,7 @@ class MinhaArvoreDeBuscaBinaria : public ArvoreDeBuscaBinaria<T>
             nodo->filhoDireita = novoNodo;
         }
     };
+      
 
     public:
     /**
