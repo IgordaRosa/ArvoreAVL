@@ -12,93 +12,61 @@ template <typename T>
 class MinhaArvoreAVL final : public MinhaArvoreDeBuscaBinaria<T>
 {
     ///////////////////////////////////////////////////////////////////////
-    protected:
-    Nodo<T> * RotacaoSimplesEsquerda(Nodo<T> * A, T chave) const
+    private:
+    Nodo<T> * RotacaoSimplesEsquerda(Nodo<T> * A)
     {
-        Nodo<T> * C = this->FilhoQueContem(A, chave);
+        
+        Nodo<T> * C = A->filhoDireita;
         Nodo<T> * D = C->filhoEsquerda;
-        A->filhoDireita = D;
         C->filhoEsquerda = A;
+        A->filhoDireita = D;
         return C;
     };
 
-    Nodo<T> * RotacaoSimplesDireita(Nodo<T> * A, T chave) const
+    Nodo<T> * RotacaoSimplesDireita(Nodo<T> * A)
     {
-        Nodo<T> * B = this->FilhoQueContem(A, chave);
+        Nodo<T> * B = A->filhoEsquerda;
         Nodo<T> * E = B->filhoDireita;
-        A->filhoEsquerda = E;
         B->filhoDireita = A;
+        A->filhoEsquerda = E;
         return B;
     };
 
-    Nodo<T> * RotacaoEsquerdaDireita(Nodo<T> * A, T chave) const
+    Nodo<T> * RotacaoEsquerdaDireita(Nodo<T> * A)
     {
-        A->filhoEsquerda = RotacaoSimplesEsquerda(A->filhoEsquerda, chave);
-        return RotacaoSimplesDireita(A, chave);
+        A->filhoEsquerda = RotacaoSimplesEsquerda(A->filhoEsquerda);
+        return RotacaoSimplesDireita(A);
     };
 
-    Nodo<T> * RotacaoDireitaEsquerda(Nodo<T> * A, T chave) const
+    Nodo<T> * RotacaoDireitaEsquerda(Nodo<T> * A)
     {
-        A->filhoDireita = RotacaoSimplesDireita(A->filhoDireita, chave);
-        return RotacaoSimplesEsquerda(A, chave);
+        A->filhoDireita = RotacaoSimplesDireita(A->filhoDireita);
+        return RotacaoSimplesEsquerda(A);
     };  
-
+    
     ///////////////////////////////////////////////////////////////////////
-    //Busca pai refeita de forma recursiva
-    Nodo<T> * BuscarPai(Nodo<T> * nodo, T chave) const
+    Nodo<T> * Balancear(Nodo<T> * nodoPai)
     {
-        if(nodo == nullptr or\
-        nodo->chave == chave or\ 
-        nodo->filhoEsquerda != nullptr and\
-        nodo->filhoEsquerda->chave == chave or\
-        nodo->filhoDireita != nullptr and\
-        nodo->filhoDireita->chave == chave)
-        {
-            return nodo; 
-        }
+        if(!nodoPai)
+            return nullptr;
+        int b = B(nodoPai);
 
-        if(nodo != nullptr and nodo->filhoEsquerda != nullptr)
-        {
-            return BuscarPai(nodo->filhoEsquerda, chave);
-        }
+        if(b < -1 and B(nodoPai->filhoDireita) <= 0)
+            return RotacaoSimplesEsquerda(nodoPai);
         
-        if(nodo != nullptr and nodo->filhoDireita != nullptr)
-        {
-            return BuscarPai(nodo->filhoDireita, chave);
-        }
+        else if(b < -1 and B(nodoPai->filhoDireita) > 0)
+            return RotacaoDireitaEsquerda(nodoPai);
+        
+        else if(b > 1 and B(nodoPai->filhoEsquerda) >= 0)
+            return RotacaoSimplesDireita(nodoPai);
+        
+        else if(b > 1 and B(nodoPai->filhoEsquerda) < 0)
+            return RotacaoEsquerdaDireita(nodoPai);
+        
+        if(nodoPai->chave = this->NodoRaiz->chave)
+            return nodoPai;
 
-        return nodo;
-    };
-
-    ///////////////////////////////////////////////////////////////////////
-    void Balancear(Nodo<T> * nodoPai, T chave) const
-    {
-        while(nodoPai->chave != this->NodoRaiz->chave)
-        {    
-            if(nodoPai == nullptr)
-                return;
-            int b = B(nodoPai);
-            if(b < -1 and B(nodoPai->filhoDireita) <= 0)
-            {
-                nodoPai = RotacaoSimplesEsquerda(nodoPai, chave);
-            }
-            else if(b < -1 and B(nodoPai->filhoDireita) > 0)
-            {
-                nodoPai = RotacaoDireitaEsquerda(nodoPai, chave);
-            }
-            else if(b > 1 and B(nodoPai->filhoEsquerda) >= 0)
-            {
-                nodoPai = RotacaoSimplesDireita(nodoPai, chave);
-            }
-            else if(b > 1 and B(nodoPai->filhoEsquerda) < 0)
-            {
-                nodoPai = RotacaoEsquerdaDireita(nodoPai, chave);
-            }
-            else
-            {
-                return;
-            }
-        }
+        return Balancear(BuscarPai(this->NodoRaiz, nodoPai->chave));
     };
 
     ///////////////////////////////////////////////////////////////////////
@@ -120,37 +88,104 @@ class MinhaArvoreAVL final : public MinhaArvoreDeBuscaBinaria<T>
     {
         if(nodo == nullptr)
             return -1;
-        return Maior(this->AlturaDoNodo(nodo->filhoEsquerda), this->AlturaDoNodo(nodo->filhoDireita)) + 1;;
+        return AtualizarAltura(nodo);
+    };
+
+    int AtualizarAltura(Nodo<T> * nodo) const
+    {
+        return Maior(this->AlturaDoNodo(nodo->filhoEsquerda), this->AlturaDoNodo(nodo->filhoDireita)) + 1;
     };
 
     ///////////////////////////////////////////////////////////////////////
-    public:
-    /**
-     * @brief Retorna a altura da (sub)arvore
-     * @param chave chave que é raiz da (sub)arvore cuja altura queremos. Se chave é nula, retorna a altura da arvore.
-     * @return Numero inteiro representando a altura da (subarvore). Se chave nao esta na arvore, retorna std::nullopt
-     */
-    std::optional<int> altura(T chave) const override
+    Nodo<T> * BuscarPai(Nodo<T> * nodo, T chave) const
     {
-        Nodo<T> * nodo = MinhaArvoreDeBuscaBinaria<T>::BuscaNaArvore(this->NodoRaiz, chave);
         if(nodo == nullptr)
-            return std::nullopt;
-        return AlturaDoNodo(nodo);
+        {
+            return nodo; 
+        }
+
+        if(nodo->chave != chave) 
+        {
+            return nodo;
+        }
+
+        if(nodo->filhoEsquerda != nullptr and\
+        nodo->filhoEsquerda->chave == chave)
+        {
+            return nodo; 
+        }
+
+        if(nodo->filhoDireita != nullptr and\
+        nodo->filhoDireita->chave == chave)
+        {
+            return nodo; 
+        }
+
+        if(nodo != nullptr and nodo->filhoEsquerda != nullptr)
+        {
+            return BuscarPai(nodo->filhoEsquerda, chave);
+        }
+        
+        if(nodo != nullptr and nodo->filhoDireita != nullptr)
+        {
+            return BuscarPai(nodo->filhoDireita, chave);
+        }
+        return nodo;
     };
     
     ///////////////////////////////////////////////////////////////////////
+    protected:
+    void ins(Nodo<T> * nodo, T chave) const
+    {
+        if(chave < nodo->chave)
+        {
+            if(nodo->filhoEsquerda == nullptr)
+            {
+                Nodo<T> * novoNodo = new Nodo<T>();
+                novoNodo->chave = chave;
+                nodo->filhoEsquerda = novoNodo;
+                novoNodo->altura = nodo->altura + 1;
+            }
+            else
+            {
+                ins(nodo->filhoEsquerda, chave);
+            }
+        }
+        else
+        {
+            if(nodo->filhoDireita == nullptr)
+            {
+                Nodo<T> * novoNodo = new Nodo<T>();
+                novoNodo->chave = chave;
+                nodo->filhoDireita = novoNodo;
+                novoNodo->altura = nodo->altura + 1;
+            }
+            else
+            {
+                ins(nodo->filhoDireita, chave);
+            }
+        }
+    };
+    
     public:
     /**
      * @brief Insere uma chave na arvore
      * @param chave chave a ser inserida
      */        
-    void inserir(T chave)
+    void inserir(T chave) override
     {
-        MinhaArvoreDeBuscaBinaria<T>::inserir(chave);
-        Nodo<T> * nodoPai = BuscarPai(this->NodoRaiz, chave);
-        if(nodoPai)
-            Balancear(nodoPai, chave);
-    };
+        if(this->vazia())
+        {
+            Nodo<T> * novoNodo = new Nodo<T>();
+            novoNodo->chave = chave;
+            novoNodo->altura = 0;
+            this->NodoRaiz = novoNodo;
+            return;
+        }
+        ins(this->NodoRaiz, chave);
+        Nodo<T> * nodoPai = this->BuscarPai(this->NodoRaiz, chave);
+        this->NodoRaiz = this->Balancear(nodoPai);
+D    };
 
     ///////////////////////////////////////////////////////////////////////
     public:
@@ -159,12 +194,9 @@ class MinhaArvoreAVL final : public MinhaArvoreDeBuscaBinaria<T>
      * @param chave chave a removida
      * @return Retorna a chave removida ou nullptr se a chave nao esta na arvore
      */        
-    void remover(T chave)
+    void remover(T chave) override
     {
         MinhaArvoreDeBuscaBinaria<T>::remover(chave);
-        Nodo<T> * nodoPai = BuscarPai(this->NodoRaiz, chave);
-        if(nodoPai)
-            Balancear(nodoPai, chave);
     };
 
     ///////////////////////////////////////////////////////////////////////
