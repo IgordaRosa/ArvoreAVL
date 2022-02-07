@@ -22,14 +22,12 @@ class MinhaListaEncadeada :  public ListaEncadeadaAbstrata<T>
     ///////////////////////////////////////////////////////////////////////
     bool estaVazia() override
     {
-        if(getTamanho() == 0 or this->_primeiro == nullptr)
-        {
+        if(getTamanho() == 0 or\
+        this->_primeiro == nullptr)
             return true;
-        }
+        
         else
-        {
             return false;
-        }
     };
 
     ///////////////////////////////////////////////////////////////////////
@@ -42,20 +40,18 @@ class MinhaListaEncadeada :  public ListaEncadeadaAbstrata<T>
     int posicao(T umDado) override
     {
         if(estaVazia())
-    {
-        throw lista_encadeada_vazia_exception{};
-    }
-    int pos = 0;
-    for(Elemento<T> * elemento = this->_primeiro;
+            throw lista_encadeada_vazia_exception{};
+
+        int pos = 0;
+        for(Elemento<T> * elemento = this->_primeiro;
         elemento != nullptr; 
         elemento = elemento->_proximo, pos++)
         {
         if(umDado == elemento->_dado)
-            {
-                return pos;
-            }
+            return pos;
+            
         }
-    throw posicao_invalida_exception{};
+        throw posicao_invalida_exception{};
     };
 
     ///////////////////////////////////////////////////////////////////////
@@ -66,11 +62,9 @@ class MinhaListaEncadeada :  public ListaEncadeadaAbstrata<T>
         elemento = elemento->_proximo)
         {
         if(umDado == elemento->_dado)
-            {
-                return true;
-            }
+            return true;
         }
-    return false;
+        return false;
     };
 
     ///////////////////////////////////////////////////////////////////////
@@ -87,20 +81,16 @@ class MinhaListaEncadeada :  public ListaEncadeadaAbstrata<T>
     void adicionaNaPosicao(T umDado, int umaPosicao)
     { 
         if(umaPosicao < 0 or umaPosicao > getTamanho())
-        {
             throw posicao_invalida_exception();
-        }
+        
         if(umaPosicao == 0)
-        {
-            this->adicionaNoInicio(umDado);
-            return;
-        }
+            return this->adicionaNoInicio(umDado);
+        
         if(umaPosicao == getTamanho())
-        {
-            this->adicionaNoFim(umDado);
-            return;
-        }
+            return this->adicionaNoFim(umDado);
+            
         Elemento<T>  * Eauxiliar = this->_primeiro;
+
         for(int i = 1; i < umaPosicao;
         Eauxiliar = Eauxiliar->_proximo, i++){}
 
@@ -115,15 +105,12 @@ class MinhaListaEncadeada :  public ListaEncadeadaAbstrata<T>
     void adicionaNoFim(T umDado) override
     {
         if(estaVazia())
-        {   
-            adicionaNoInicio(umDado);
-            return;
-        }
+            return adicionaNoInicio(umDado);
+        
         Elemento<T>  * ultimo = this->_primeiro;
         while(ultimo->_proximo != nullptr)
-        {
             ultimo = ultimo->_proximo;
-        }
+        
         Elemento<T>  * novoElemento = new Elemento<T>();
         novoElemento->_dado = umDado;
         novoElemento->_proximo = nullptr;
@@ -135,9 +122,8 @@ class MinhaListaEncadeada :  public ListaEncadeadaAbstrata<T>
     T retiraDoInicio() override
     {
         if(estaVazia())
-        {
             throw lista_encadeada_vazia_exception();
-        }
+        
         Elemento<T>  * elemento = this->_primeiro;
         T dado = elemento->_dado;
         this->_primeiro = elemento->_proximo;
@@ -150,20 +136,19 @@ class MinhaListaEncadeada :  public ListaEncadeadaAbstrata<T>
     T retiraDaPosicao(int umaPosicao) override
     {
         if(umaPosicao < 0 or umaPosicao >= getTamanho())
-        {
             throw posicao_invalida_exception();
-        }
+        
         if(umaPosicao == 0)
-        {
             return this->retiraDoInicio();
-        }
+        
         if(umaPosicao == getTamanho() - 1)
-        {
             return this->retiraDoFim();
-        }
+        
         Elemento<T>  * aux = this->_primeiro;
+
         for(int i = 1; i < umaPosicao;
         aux = aux->_proximo, i++) {}
+
         Elemento<T>  * deletar = aux->_proximo;
         aux->_proximo = deletar->_proximo;
         T dado = deletar->_dado;
@@ -176,16 +161,16 @@ class MinhaListaEncadeada :  public ListaEncadeadaAbstrata<T>
     T retiraDoFim() override
     {
         if(estaVazia())
-        {
             throw lista_encadeada_vazia_exception();
-        }
+        
         if(getTamanho() == 1)
-        {
             return this->retiraDoInicio();
-        }
+        
         Elemento<T>  * pultimo = this->_primeiro;
+
         for(int i = 0; i < getTamanho() - 2;
         pultimo = pultimo->_proximo, i++) {}
+        
         Elemento<T>  * ultimo = pultimo->_proximo;
         T dado = ultimo->_dado;
         pultimo->_proximo = nullptr;

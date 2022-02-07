@@ -12,10 +12,10 @@ template <typename T>
 class MinhaArvoreAVL final : public MinhaArvoreDeBuscaBinaria<T>
 {
     ///////////////////////////////////////////////////////////////////////
-    private:
+    //Rotações
+    protected:
     Nodo<T> * RotacaoSimplesEsquerda(Nodo<T> * A)
     {
-        
         Nodo<T> * C = A->filhoDireita;
         Nodo<T> * D = C->filhoEsquerda;
         C->filhoEsquerda = A;
@@ -45,6 +45,17 @@ class MinhaArvoreAVL final : public MinhaArvoreDeBuscaBinaria<T>
     };  
     
     ///////////////////////////////////////////////////////////////////////
+    //Balanceamento
+    Nodo<T> * ReBalancear(Nodo<T> * nodo)
+    {
+        if(nodo->filhoEsquerda)
+            nodo->filhoEsquerda = Balancear(nodo->filhoEsquerda);
+                
+        if(nodo->filhoDireita)
+            nodo->filhoDireita = Balancear(nodo->filhoDireita);
+        return nodo;
+    };
+
     Nodo<T> * Balancear(Nodo<T> * nodoPai)
     {
         if(!nodoPai)
@@ -63,13 +74,14 @@ class MinhaArvoreAVL final : public MinhaArvoreDeBuscaBinaria<T>
         else if(b > 1 and B(nodoPai->filhoEsquerda) < 0)
             return RotacaoEsquerdaDireita(nodoPai);
         
-        if(nodoPai->chave = this->NodoRaiz->chave)
+        if(nodoPai->chave == this->NodoRaiz->chave)
             return nodoPai;
 
-        return Balancear(BuscarPai(this->NodoRaiz, nodoPai->chave));
+        return nodoPai;
     };
 
     ///////////////////////////////////////////////////////////////////////
+    //Fator B
     int B(Nodo<T> * nodo) const
     {
         if(nodo)
@@ -97,72 +109,46 @@ class MinhaArvoreAVL final : public MinhaArvoreDeBuscaBinaria<T>
     };
 
     ///////////////////////////////////////////////////////////////////////
-    Nodo<T> * BuscarPai(Nodo<T> * nodo, T chave) const
-    {
-        if(nodo == nullptr)
-        {
-            return nodo; 
-        }
-
-        if(nodo->chave != chave) 
-        {
-            return nodo;
-        }
-
-        if(nodo->filhoEsquerda != nullptr and\
-        nodo->filhoEsquerda->chave == chave)
-        {
-            return nodo; 
-        }
-
-        if(nodo->filhoDireita != nullptr and\
-        nodo->filhoDireita->chave == chave)
-        {
-            return nodo; 
-        }
-
-        if(nodo != nullptr and nodo->filhoEsquerda != nullptr)
-        {
-            return BuscarPai(nodo->filhoEsquerda, chave);
-        }
-        
-        if(nodo != nullptr and nodo->filhoDireita != nullptr)
-        {
-            return BuscarPai(nodo->filhoDireita, chave);
-        }
-        return nodo;
-    };
-    
-    ///////////////////////////////////////////////////////////////////////
+    //Inserir um nodo
     protected:
-    void ins(Nodo<T> * nodo, T chave) const
+    Nodo<T> * NovoNodo(Nodo<T> * nodo, T chave)
+    {
+        Nodo<T> * novoNodo = new Nodo<T>();
+        novoNodo->chave = chave;
+        novoNodo->altura = nodo->altura + 1;
+        return novoNodo;
+    };
+
+    void NovoNodoRaiz(T chave)
+    {
+        Nodo<T> * novoNodo = new Nodo<T>();
+        novoNodo->chave = chave;
+        novoNodo->altura = 0;
+        this->NodoRaiz = novoNodo;
+    };
+
+    void ins(Nodo<T> * nodo, T chave)
     {
         if(chave < nodo->chave)
         {
-            if(nodo->filhoEsquerda == nullptr)
-            {
-                Nodo<T> * novoNodo = new Nodo<T>();
-                novoNodo->chave = chave;
-                nodo->filhoEsquerda = novoNodo;
-                novoNodo->altura = nodo->altura + 1;
-            }
+            if(!nodo->filhoEsquerda)
+                nodo->filhoEsquerda = NovoNodo(nodo, chave);
+            
             else
             {
                 ins(nodo->filhoEsquerda, chave);
+                nodo = ReBalancear(nodo);
             }
         }
         else
         {
-            if(nodo->filhoDireita == nullptr)
-            {
-                Nodo<T> * novoNodo = new Nodo<T>();
-                novoNodo->chave = chave;
-                nodo->filhoDireita = novoNodo;
-                novoNodo->altura = nodo->altura + 1;
-            }
+            if(!nodo->filhoDireita)
+                nodo->filhoDireita = NovoNodo(nodo, chave);
+            
             else
             {
                 ins(nodo->filhoDireita, chave);
+                nodo = ReBalancear(nodo);
             }
         }
     };
@@ -175,19 +161,58 @@ class MinhaArvoreAVL final : public MinhaArvoreDeBuscaBinaria<T>
     void inserir(T chave) override
     {
         if(this->vazia())
-        {
-            Nodo<T> * novoNodo = new Nodo<T>();
-            novoNodo->chave = chave;
-            novoNodo->altura = 0;
-            this->NodoRaiz = novoNodo;
-            return;
-        }
+            return NovoNodoRaiz(chave);
         ins(this->NodoRaiz, chave);
-        Nodo<T> * nodoPai = this->BuscarPai(this->NodoRaiz, chave);
-        this->NodoRaiz = this->Balancear(nodoPai);
-D    };
+        this->NodoRaiz = Balancear(this->NodoRaiz);
+    };
 
     ///////////////////////////////////////////////////////////////////////
+    //Remover um nodo
+    protected:
+    void re(Nodo<T> * nodoPai, T chave)
+    {
+        if(!nodoPai)
+            return;
+
+        Nodo<T> * nodo = this->FilhoQueContem(nodoPai, chave);
+
+        if(nodoPai == nodo and !nodoPai->filhoEsquerda and !nodoPai->filhoDireita)
+        {
+            nodoPai = nullptr;
+            delete nodoPai;
+            return;
+        }
+    
+        else if(nodoPai->filhoEsquerda == nodo and !nodo->filhoEsquerda and !nodo->filhoDireita)
+        {
+            nodoPai->filhoEsquerda = nullptr;
+            delete nodo;
+            return;
+        }
+
+        else if(nodoPai->filhoDireita == nodo and !nodo->filhoEsquerda and !nodo->filhoDireita)
+        {
+            nodoPai->filhoDireita = nullptr;
+            delete nodo;
+            return;
+        }
+
+        if(nodo->filhoDireita)
+        {
+            Nodo<T> * aux = nodo->filhoDireita;
+            Nodo<T> * auxPai = nodo;
+            while(aux->filhoEsquerda)
+            {
+                auxPai = aux;
+                aux = aux->filhoEsquerda;
+            }
+            nodo->chave = aux->chave;
+            aux->chave = chave;
+            re(auxPai, chave);
+            nodoPai = ReBalancear(nodoPai);
+        }
+    };
+
     public:
     /**
      * @brief Remove uma chave da arvore
@@ -196,7 +221,19 @@ D    };
      */        
     void remover(T chave) override
     {
-        MinhaArvoreDeBuscaBinaria<T>::remover(chave);
+        if(this->NodoRaiz->chave == chave and\
+        !this->NodoRaiz->filhoEsquerda and\
+        !this->NodoRaiz->filhoDireita)
+        {
+            delete this->NodoRaiz;
+            this->NodoRaiz = nullptr;
+            return;
+        }
+        if(this->contem(chave))
+        {
+            re(this->BuscaPaiNaArvore(this->NodoRaiz, chave), chave);
+            this->NodoRaiz = Balancear(this->NodoRaiz);
+        }
     };
 
     ///////////////////////////////////////////////////////////////////////

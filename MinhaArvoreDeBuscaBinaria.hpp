@@ -26,35 +26,29 @@ class MinhaArvoreDeBuscaBinaria : public ArvoreDeBuscaBinaria<T>
 
     Nodo<T> * BuscaNaArvore(Nodo<T> * nodo, T chave) const
     {
-        while(nodo != nullptr and nodo->chave != chave)
+        while(nodo and nodo->chave != chave)
         {
             if(nodo->chave < chave)
-            {
                 nodo = nodo->filhoDireita;
-            }
+            
             else
-            {
                 nodo = nodo->filhoEsquerda;
-            }
         }
         return nodo;
     };
 
     Nodo<T> * BuscaPaiNaArvore(Nodo<T> * nodo, T chave) const
     {
-        while(nodo != nullptr and\
+        while(nodo and\
         nodo->chave != chave and\
         nodo->filhoEsquerda->chave != chave and\
         nodo->filhoDireita->chave != chave)
         {
             if(nodo->chave < chave)
-            {
                 nodo = nodo->filhoDireita;
-            }
+            
             else
-            {
                 nodo = nodo->filhoEsquerda;
-            }
         }
         return nodo;
     };
@@ -62,18 +56,14 @@ class MinhaArvoreDeBuscaBinaria : public ArvoreDeBuscaBinaria<T>
     Nodo<T> * FilhoQueContem(Nodo<T> * nodoPai, T chave) const
     {
         if(nodoPai->chave == chave)
-        {
             return nodoPai;
         
-        }
-        else if(nodoPai->filhoEsquerda != nullptr and nodoPai->filhoEsquerda->chave == chave)
-        {
+        else if(nodoPai->filhoEsquerda and nodoPai->filhoEsquerda->chave == chave)
             return nodoPai->filhoEsquerda;
-        }
-        else if(nodoPai->filhoDireita != nullptr and nodoPai->filhoDireita->chave == chave)
-        {
+        
+        else if(nodoPai->filhoDireita and nodoPai->filhoDireita->chave == chave)
             return nodoPai->filhoDireita;
-        }
+        
         return nodoPai;
     };
 
@@ -82,14 +72,13 @@ class MinhaArvoreDeBuscaBinaria : public ArvoreDeBuscaBinaria<T>
     protected:
     void destruir(Nodo<T> * nodo) const
     {
-        if(nodo == nullptr)
-        {
+        if(!nodo)
             return;
-        }
-            destruir(nodo->filhoEsquerda);
-            destruir(nodo->filhoDireita);
+        
+        destruir(nodo->filhoEsquerda);
+        destruir(nodo->filhoDireita);
 
-            delete nodo;
+        delete nodo;
     };
 
     public:
@@ -106,9 +95,7 @@ class MinhaArvoreDeBuscaBinaria : public ArvoreDeBuscaBinaria<T>
     bool vazia() const override
     {
         if(NodoRaiz == nullptr)
-        {
              return true;
-        }
         return false;
     };
 
@@ -116,10 +103,9 @@ class MinhaArvoreDeBuscaBinaria : public ArvoreDeBuscaBinaria<T>
     protected:
     int quant(Nodo<T> * nodo) const
     {
-        if(nodo == nullptr)
-        {
+        if(!nodo)
             return 0;
-        }
+        
         return 1 + this->quant(nodo->filhoEsquerda) + this->quant(nodo->filhoDireita);
     };
 
@@ -142,10 +128,8 @@ class MinhaArvoreDeBuscaBinaria : public ArvoreDeBuscaBinaria<T>
     bool contem(T chave) const override
     {
         Nodo<T> * nodo = BuscaNaArvore(NodoRaiz, chave);
-        if(nodo != nullptr and nodo->chave == chave)
-        {
+        if(nodo and nodo->chave == chave)
             return true;
-        }
         return false;
     };
     
@@ -155,13 +139,10 @@ class MinhaArvoreDeBuscaBinaria : public ArvoreDeBuscaBinaria<T>
     {
         int Esquerda = 0, Direita = 0;
         if(nodo->filhoEsquerda != nullptr)
-        {
             Esquerda = 1 + alt(nodo->filhoEsquerda);
-        }
+        
         if(nodo->filhoDireita != nullptr)
-        {
             Direita = 1 + alt(nodo->filhoDireita);
-        }
 
         if(Esquerda >= Direita)
         {
@@ -181,34 +162,28 @@ class MinhaArvoreDeBuscaBinaria : public ArvoreDeBuscaBinaria<T>
     std::optional<int> altura(T chave) const override
     {
         Nodo<T> * nodo = BuscaNaArvore(NodoRaiz, chave);
-        if(nodo == nullptr)
-        {
+        if(!nodo)
             return std::nullopt;
-        }
         return alt(nodo);
-    }
+    };
 
     ///////////////////////////////////////////////////////////////////////
     protected:
     void inse(Nodo<T> * nodo, T chave) const
     {   
-        while(nodo != nullptr and\
+        while(nodo and\
         nodo->filhoEsquerda != nullptr and\
         nodo->filhoDireita != nullptr)
         {
             if(nodo->chave < chave)
-            {
                 nodo = nodo->filhoDireita;
-            }
+
             else
-            {
                 nodo = nodo->filhoEsquerda;
-            }
         }
-        if(nodo == nullptr)
-        {
+        if(!nodo)
             return;
-        }
+        
         if(chave < nodo->chave)
         {
             Nodo<T> * novoNodo = new Nodo<T>();
@@ -247,27 +222,26 @@ class MinhaArvoreDeBuscaBinaria : public ArvoreDeBuscaBinaria<T>
     protected:
     void rem(Nodo<T> * nodoPai, T chave) const
     {
-        if(nodoPai == nullptr)
-        {
+        if(!nodoPai)
             return;
-        }
+        
         Nodo<T> * nodo = FilhoQueContem(nodoPai, chave);
 
-        if(nodoPai->filhoEsquerda == nullptr and nodoPai->filhoDireita == nullptr)
+        if(!nodoPai->filhoEsquerda and !nodoPai->filhoDireita)
             {
                 nodoPai = nullptr;
                 delete nodoPai;
                 return;
             }
     
-        else if(nodoPai->filhoEsquerda == nodo and nodo->filhoEsquerda == nullptr and nodo->filhoDireita == nullptr)
+        else if(nodoPai->filhoEsquerda == nodo and !nodo->filhoEsquerda and !nodo->filhoDireita)
             {
                 nodoPai->filhoEsquerda = nullptr;
                 delete nodo;
                 return;
             }
 
-        else if(nodoPai->filhoDireita == nodo and nodo->filhoEsquerda == nullptr and nodo->filhoDireita == nullptr)
+        else if(nodoPai->filhoDireita == nodo and !nodo->filhoEsquerda and !nodo->filhoDireita)
             {
                 nodoPai->filhoDireita = nullptr;
                 delete nodo;
@@ -275,18 +249,18 @@ class MinhaArvoreDeBuscaBinaria : public ArvoreDeBuscaBinaria<T>
             }
         
 
-        if(nodo->filhoDireita != nullptr)
+        if(nodo->filhoDireita)
         {
             Nodo<T> * aux = nodo->filhoDireita;
             nodoPai = nodo;
-            while(aux->filhoEsquerda != nullptr)
+            while(aux->filhoEsquerda)
             {
                 nodoPai = aux;
                 aux = aux->filhoEsquerda;
             }
             nodo->chave = aux->chave;
             aux->chave = chave;
-            this->rem(nodoPai, chave);
+            rem(nodoPai, chave);
         }
     };
 
@@ -299,17 +273,15 @@ class MinhaArvoreDeBuscaBinaria : public ArvoreDeBuscaBinaria<T>
     void remover(T chave) override
     {
         if(NodoRaiz->chave == chave and\
-        NodoRaiz->filhoEsquerda == nullptr and\
-        NodoRaiz->filhoDireita == nullptr)
+        !NodoRaiz->filhoEsquerda and\
+        !NodoRaiz->filhoDireita)
         {
             delete NodoRaiz;
             NodoRaiz = nullptr;
             return;
         }
         if(contem(chave))
-        {
             rem(BuscaPaiNaArvore(NodoRaiz, chave), chave);
-        }
     };
 
     ///////////////////////////////////////////////////////////////////////
@@ -321,10 +293,8 @@ class MinhaArvoreDeBuscaBinaria : public ArvoreDeBuscaBinaria<T>
     std::optional<T> filhoEsquerdaDe(T chave) const override
     {
         Nodo<T> * nodo = BuscaNaArvore(NodoRaiz, chave);
-        if(nodo == nullptr or nodo->filhoEsquerda == nullptr)
-        {
+        if(!nodo or !nodo->filhoEsquerda)
             return std::nullopt;
-        }
         return nodo->filhoEsquerda->chave;
     };
 
@@ -337,10 +307,8 @@ class MinhaArvoreDeBuscaBinaria : public ArvoreDeBuscaBinaria<T>
     std::optional<T> filhoDireitaDe(T chave) const override
     {
         Nodo<T> * nodo = BuscaNaArvore(NodoRaiz, chave);
-        if(nodo == nullptr or nodo->filhoDireita == nullptr)
-        {
+        if(!nodo or !nodo->filhoDireita)
             return std::nullopt;
-        }
         return nodo->filhoDireita->chave;
     };
 
@@ -348,10 +316,9 @@ class MinhaArvoreDeBuscaBinaria : public ArvoreDeBuscaBinaria<T>
     protected:
     void em(ListaEncadeadaAbstrata<T> * lista, Nodo<T> * nodo) const
     {
-        if(nodo == nullptr)
-        {
+        if(!nodo)
             return;
-        }
+        
         this->em(lista, nodo->filhoEsquerda);
         lista->adicionaNoFim(nodo->chave);
         this->em(lista, nodo->filhoDireita);
@@ -373,10 +340,9 @@ class MinhaArvoreDeBuscaBinaria : public ArvoreDeBuscaBinaria<T>
     protected:
     void pre(ListaEncadeadaAbstrata<T> * lista, Nodo<T> * nodo) const
     {
-        if(nodo == nullptr)
-        {
+        if(!nodo)
             return;
-        }
+        
         lista->adicionaNoFim(nodo->chave);
         this->pre(lista, nodo->filhoEsquerda);
         this->pre(lista, nodo->filhoDireita);
@@ -398,10 +364,9 @@ class MinhaArvoreDeBuscaBinaria : public ArvoreDeBuscaBinaria<T>
     protected:
     void pos(ListaEncadeadaAbstrata<T> * lista, Nodo<T> * nodo) const
     {
-        if(nodo == nullptr)
-        {
+        if(!nodo)
             return;
-        }
+
         this->pos(lista, nodo->filhoEsquerda);
         this->pos(lista, nodo->filhoDireita);
         lista->adicionaNoFim(nodo->chave);
